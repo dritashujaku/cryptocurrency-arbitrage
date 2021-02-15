@@ -1,0 +1,7 @@
+numpy
+fastapi
+uvicorn
+requests
+pymongo
+odmantic
+dnspython
