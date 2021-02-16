@@ -1,6 +1,6 @@
 
 export const symbols = [
-  'BTC', 'ETH', 'DOGE', 'USDT', 'USD', 'EUR', 'XRP', 'BCH', 'BSV', 'ADA', 'LTC', 'BNB', 'CRO', 'EOS', 'LINK', 'XTZ', 'XLM', 'TRX', 'XMR'
+  'BTC', 'ETH', 'DOGE', 'USDT', 'USD', 'EUR', 'XRP', 'BCH', 'BSV', 'ADA', 'LTC', 'BNB', 'CRO', 'EOS', 'LINK', 'XTZ', 'XLM', 'TRX', 'XMR',
   // 'GBP', 'CHF', 'CAD'
 ]
 

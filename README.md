@@ -6,3 +6,6 @@ This project visualizes currencies and their rates (relationships) with graphs. 
 
 - client -> React frontend
 - server -> FastAPI
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
