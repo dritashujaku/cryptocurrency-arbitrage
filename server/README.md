@@ -3,12 +3,15 @@
 The project's backend developed in Python 3.8 using [FastAPI](https://github.com/tiangolo/fastapi) and [odmantic](https://github.com/art049/odmantic).
 
 ## Setup
-
-To run the project first activate the virtual environment
+First create a virtual environment
+```
+$ python -m venv venv
+```
+Then activate the venv
 ```
 $ .\venv\Scripts\activate
 ```
-Now install the requirements from requirements.txt file in the terminal with:
+Now install the requirements from requirements.txt file in the terminal with
 ```
 $ pip install -r requirements.txt
 ```

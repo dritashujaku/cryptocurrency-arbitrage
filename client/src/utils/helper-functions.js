@@ -46,3 +46,61 @@ export const createGraph = (item, exchange) => {
   console.log('graph from item', graph)
   return graph
 }
+export const createGraphFromTickers = (item, exchange) => {
+  // if (!item) {
+  //   return {
+  //     nodes: [],
+  //     edges: []
+  //   }
+  // }
+  const edges = Object.values(item).map(ticker => {
+    const [source, target] = ticker.symbol.split('/')
+    return {
+      source,
+      target,
+      quote: ticker.last
+    }
+  })
+
+  const nodes = edges.reduce((acc, current) => {
+    const edgeNodes = [current.source, current.target]
+    return acc.concat(edgeNodes)
+  }, []).filter((next, index, array) => array.indexOf(next) === index)
+
+  const graph = {nodes, edges, exchange}
+
+  console.log('graph from item', graph)
+  return graph
+}
+
+
+export const createGraphFromOrders = (item = {}, exchange) => {
+  // if (!item) {
+  //   return {
+  //     nodes: [],
+  //     edges: []
+  //   }
+  // }
+  const edges = Object.values(item).reduce((acc, next) => {
+    const [source, target] = next.symbol.split('/')
+    return acc.concat([{
+      source,
+      target,
+      quote: next.bid
+    }, {
+      source: target,
+      target: source,
+      quote: 1 / next.ask
+    }])
+  }, []).filter(({quote}) => !!quote || quote !== Infinity)
+
+  const nodes = edges.reduce((acc, current) => {
+    const edgeNodes = [current.source, current.target]
+    return acc.concat(edgeNodes)
+  }, []).filter((next, index, array) => array.indexOf(next) === index)
+
+  const graph = {nodes, edges, exchange}
+
+  console.log('graph from item', graph)
+  return graph
+}

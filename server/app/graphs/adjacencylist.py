@@ -1,5 +1,4 @@
 from collections import deque
-
 import numpy as np
 
 from app.graphs.graph import Graph

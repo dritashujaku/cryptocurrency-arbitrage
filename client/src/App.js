@@ -29,4 +29,4 @@ const App = () => (
   </Provider>
 )
 
-export default hot(App)
+export default App // hot(App)
