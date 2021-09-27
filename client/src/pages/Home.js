@@ -37,6 +37,7 @@ const useStyles = makeStyles(({palette, spacing}) => ({
 		display: 'flex',
 		justifyContent: 'flex-end',
 		alignItems: 'center',
+		cursor: 'pointer',
 		'& > *:not(:last-child)': {
 			marginRight: spacing()
 		}
@@ -59,6 +60,8 @@ const Home = props => {
 	const [graph, setGraph] = useState(last || defaultGraph)
 	const [cycleToggle, setCycleToggle] = useState(false)
 	const [request, setRequest] = useState(0)
+
+	const path = cycleToggle ? graph.cycle : graph
 
 	const message = {
 		exchange: 'binance',
@@ -97,22 +100,6 @@ const Home = props => {
 		sendMessage(webSocket)
 	}, [request])
 
-	useEffect(() => {
-		if (cycleToggle) {
-			setGraph(graph.cycle)
-		} else {
-			if (last) {
-				setGraph(last)
-			}
-		}
-	}, [cycleToggle])
-
-	useEffect(() => {
-		if (graph.cycle && cycleToggle) {
-			setCycleToggle(!cycleToggle)
-		}
-	}, [graph])
-
 
 	// console.log('moment formatted', moment.utc(data.timestamp).local().format("D MMM YYYY HH:mm Z"))
 	// console.log('moment formatted', moment.unix(data.timestamp).format("D MMM YYYY HH:mm:ss Z"))
@@ -120,13 +107,13 @@ const Home = props => {
 
 	return (
 		<Page>
-			<GraphContainer elements={createElements(graph, getCurrencies(graph.nodes))}/>
+			<GraphContainer elements={createElements(path, getCurrencies(path.nodes), cycleToggle)}/>
 			<div className={classes.information}>
 				<span>Arbitrages found so far: {arbitrages.length}</span>
 				<div>Request: {request}</div>
-				<HistoryTable className={classes.table} items={arbitrages} selected={graph.id} onCellClick={graph => setGraph(graph)}/>
-				<div className={classes.switch}>
-					<Switch checked={cycleToggle} size={'small'} onClick={() => setCycleToggle(!cycleToggle)}/>
+				<HistoryTable className={classes.table} items={arbitrages} selected={graph.id} onCellClick={setGraph}/>
+				<div className={classes.switch} onClick={() => setCycleToggle(!cycleToggle)}>
+					<Switch checked={cycleToggle} size={'small'}/>
 					<span>{cycleToggle ? 'Hide' : 'Show'} Cycle</span>
 				</div>
 			</div>

@@ -14,13 +14,13 @@ const isEdgeInCycle = (edge, cycle) => {
   return !!cycle.edges.find(next => next.source === edge.source && next.target === edge.target)
 }
 
-export const createElements = (item, currencies) => {
+export const createElements = (item, currencies, isCycle) => {
   const {nodes: prevNodes = [], edges: prevEdges = []} = item
   const nodes = prevNodes.map(next => ({
     data: {id: next, svg: currencies[next].svg.color}
   }))
   const edges = prevEdges.map(edge => {
-    const inCycle = isEdgeInCycle(edge, item.cycle)
+    const inCycle = isCycle || isEdgeInCycle(edge, item.cycle)
     return {
       data: {
         ...edge,

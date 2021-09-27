@@ -1,8 +1,6 @@
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 import {
-	Button,
 	makeStyles,
-	Paper,
 	Table,
 	TableBody,
 	TableCell,
@@ -72,7 +70,7 @@ const HistoryTable = props => {
 								{moment.unix(row.timestamp).format("D MMM YYYY HH:mm:ss Z")}
 							</TableCell>
 							<TableCell align='left'>{roundNumber(row.profit, 8)}</TableCell>
-							<TableCell align='center' onClick={() => onCellClick(row.cycle)}>{formatNodes(row.cycle.nodes)}</TableCell>
+							<TableCell align='center'>{formatNodes(row.cycle.nodes)}</TableCell>
 						</TableRow>
 					))}
 				</TableBody>

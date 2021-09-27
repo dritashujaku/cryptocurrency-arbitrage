@@ -74,7 +74,7 @@ const edgeLabelStyle = {
     'text-margin-y': '0px',
     'text-valign': 'center',
     'text-halign': 'center',
-    'color': '#94A6B8',
+    'color': '#94a6b8',
     'font-size': 10,
     // 'text-background-opacity': 0.4,
     // 'text-background-color': '#202121'
