@@ -30,12 +30,17 @@ def find(graph):
             edges.append(EdgeModel(source=graph.nodes[edge.start], target=graph.nodes[edge.end], quote=quote))
         profit = ending_unit - starting_unit
         currency = edges[-1].target
+        usd_edge = next((x for x in graph.edges if x.target == 'USDT' and x.source == currency), None)
+        usd_profit = None
+        if usd_edge:
+            usd_profit = profit * usd_edge.quote
         cycle = {'nodes': nodes, 'edges': edges}
         result = {
             **graph.dict(),
             'cycle': cycle,
             'profit': profit,
-            'currency': currency
+            'currency': currency,
+            'usdProfit': usd_profit
         }
         return Graph(**result)
     return None

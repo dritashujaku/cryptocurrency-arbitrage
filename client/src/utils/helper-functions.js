@@ -24,7 +24,7 @@ export const createElements = (item, currencies, isCycle) => {
     return {
       data: {
         ...edge,
-        quote: roundNumber(edge.quote, 8),
+        quote: isCycle ? roundNumber(edge.quote, 9) : roundNumber(edge.quote, 6),
         ...inCycle && {inCycle}
       }
     }})

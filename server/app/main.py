@@ -37,10 +37,9 @@ async def root():
     return {'message': 'Welcome'}
 
 
-# @app.post('/arbitrage', response_model=Graph)
 async def findarbitrage(graph: Graph):
     arbitrage = find(graph)  # build_graph
-    print('arbitrage', arbitrage)
+    # print('arbitrage', arbitrage)
     if arbitrage:
         return await engine.save(arbitrage)
     return None
@@ -50,7 +49,6 @@ async def findarbitrage(graph: Graph):
 @app.get('/arbitrages', response_model=List[Graph])
 async def get_all(skip: int = 0, limit: Optional[int] = None):
     result = await engine.find(Graph, skip=skip, limit=limit)
-    print(result)
     return result
 
 
@@ -87,13 +85,11 @@ response = {
 
 
 async def poll(exchange, pairs):
-    # while True:
+    while True:
         try:
-            # yield await exchange.fetchBidsAsks(pairs)
-            found = await engine.find_one(Graph)
-            yield found.dict()
+            yield await exchange.fetchBidsAsks(pairs)
             await exchange.close()
-            await asyncio.sleep(exchange.rateLimit / 1000)
+            await asyncio.sleep(exchange.rateLimit / 1000 * 50)
         # except ccxt.RequestTimeout as e:
         #     print('[' + type(e).__name__ + ']')
         #     print(str(e)[0:200])
@@ -125,18 +121,17 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             request = await websocket.receive_json()
-            print('client request', request)
+            # print('client request', request)
             exchange_name = request['exchange']
             pairs = request['pairs']
             exchange_id = exchange_name.lower()
             exchange = await setup_exchange(exchange_id)
             async for orderbook in poll(exchange, pairs):
-                print('order book', orderbook)
+                # print('order book', orderbook)
                 graph = build_graph(orderbook, exchange_id)
-                print('graph built', graph)
+                # print('graph built', graph)
                 data = await findarbitrage(Graph(**graph))
                 if data is not None:
-                    print('data', data)
                     await websocket.send_json(jsonable_encoder(data))
             await exchange.close()
     except WebSocketDisconnect as e:
@@ -155,7 +150,7 @@ async def setup_exchange(exchange_id='binance'):
 
 
 def map_props(array, pair):
-    print('pair', pair)
+    # print('pair', pair)
     source, target = pair['symbol'].split('/')
     bid_dict = {
         'source': source,
@@ -171,7 +166,7 @@ def map_props(array, pair):
 
 
 def build_graph(obj, exchange):
-    print('object values', obj.values())
+    # print('object values', obj.values())
     all_edges = reduce(map_props, obj.values(), [])
     edges = list(filter(
         lambda symbol: 'quote' in symbol and (bool(symbol['quote']) or

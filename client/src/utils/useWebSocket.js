@@ -17,7 +17,7 @@ const useWebSocket = (id, onOpen, onMessage, onError, onClose) => {
 
 		ws.onmessage = event => {
 			console.log('message from server', event.data)
-			onMessage(event.data)
+			onMessage(JSON.parse(event.data))
 		}
 
 		ws.onerror = event => {

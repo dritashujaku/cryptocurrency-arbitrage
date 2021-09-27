@@ -13,6 +13,8 @@ import {getCurrencies, pairSymbols} from 'utils/currencies'
 import {createElements} from 'utils/helper-functions'
 import useWebSocket from 'utils/useWebSocket'
 import HistoryTable from 'containers/HistoryTable'
+import {selectView} from 'reducers/ArbitragesView'
+import LoadingIndicator from 'utils/LoadingIndicator'
 
 
 const useStyles = makeStyles(({palette, spacing}) => ({
@@ -24,7 +26,7 @@ const useStyles = makeStyles(({palette, spacing}) => ({
 	information: {
 		display: 'flex',
 		flexFlow: 'column',
-		minWidth: '40%',
+		minWidth: '42%',
 		height: '100%',
 		justifyContent: 'center',
 		marginLeft: spacing(2),
@@ -55,11 +57,11 @@ const Home = props => {
 	const dispatch = useDispatch()
 	const arbitrages = useSelector(selectSortedArbitrages)
 	const last = useSelector(selectLastArbitrage)
+	const view = useSelector(selectView)
 	console.log('arbitrages', arbitrages)
 
 	const [graph, setGraph] = useState(last || defaultGraph)
 	const [cycleToggle, setCycleToggle] = useState(false)
-	const [request, setRequest] = useState(0)
 
 	const path = cycleToggle ? graph.cycle : graph
 
@@ -93,28 +95,23 @@ const Home = props => {
 		setGraph(last)
 	}, [last])
 
-	useEffect(() => {
-		if (!request) {
-			return
-		}
-		sendMessage(webSocket)
-	}, [request])
-
 
 	// console.log('moment formatted', moment.utc(data.timestamp).local().format("D MMM YYYY HH:mm Z"))
 	// console.log('moment formatted', moment.unix(data.timestamp).format("D MMM YYYY HH:mm:ss Z"))
 
+	if (view.loading) {
+		return <LoadingIndicator/>
+	}
 
 	return (
 		<Page>
-			<GraphContainer elements={createElements(path, getCurrencies(path.nodes), cycleToggle)}/>
+			{!view.code ? <GraphContainer elements={createElements(path, getCurrencies(path.nodes), cycleToggle)}/> : <span>{view.message}</span>}
 			<div className={classes.information}>
 				<span>Arbitrages found so far: {arbitrages.length}</span>
-				<div>Request: {request}</div>
 				<HistoryTable className={classes.table} items={arbitrages} selected={graph.id} onCellClick={setGraph}/>
 				<div className={classes.switch} onClick={() => setCycleToggle(!cycleToggle)}>
 					<Switch checked={cycleToggle} size={'small'}/>
-					<span>{cycleToggle ? 'Hide' : 'Show'} Cycle</span>
+					<span>Show Cycle</span>
 				</div>
 			</div>
 		</Page>
