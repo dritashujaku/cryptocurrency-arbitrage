@@ -12,6 +12,26 @@ const arbitrages = (state = [], action) => {
   }
 }
 
+const sortItems = items => {
+  // sort from latest
+  return [...items].sort((a, b) => b.timestamp - a.timestamp)
+}
+
 export const selectArbitrages = state => state.arbitrages
+
+export const selectSortedArbitrages = createSelector(
+  selectArbitrages,
+  sortItems
+)
+
+export const selectLastArbitrage = createSelector(
+  selectSortedArbitrages,
+  items => {
+    if (items.length > 0) {
+      return items[0]
+    }
+    return null
+  }
+)
 
 export default arbitrages

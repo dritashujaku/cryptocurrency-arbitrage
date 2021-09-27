@@ -21,6 +21,7 @@ export const pairSymbols = [
 	'LINK/BTC',
 	'NANO/ETH',
 	'NANO/BTC',
+	'NANO/USDT',
 	'DOGE/USDT',
 	'DOGE/EUR',
 	'DOGE/BTC',
@@ -36,10 +37,10 @@ export const pairSymbols = [
 	'BTC/EUR',
 	'BTC/USD',
 	'BTC/USDT',
-	'BTC/DAI',
+	// 'BTC/DAI',
 ]
 
-export const getCurrencies = symbols => symbols
+export const getCurrencies = (symbols = []) => symbols
 	.reduce((acc, current) => {
 		let color, black
 		try {
@@ -50,18 +51,14 @@ export const getCurrencies = symbols => symbols
 			black = require(`cryptocurrency-icons/svg/black/generic.svg`)
 		}
 
-		const entry = {
+		return {
+			...acc,
 			[current]: {
 				svg: {
 					black,
 					color
 				}
 			}
-		}
-
-		return {
-			...acc,
-			...entry
 		}
 	}, {})
 

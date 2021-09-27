@@ -87,9 +87,11 @@ response = {
 
 
 async def poll(exchange, pairs):
-    while True:
+    # while True:
         try:
-            yield await exchange.fetchBidsAsks(pairs)
+            # yield await exchange.fetchBidsAsks(pairs)
+            found = await engine.find_one(Graph)
+            yield found.dict()
             await exchange.close()
             await asyncio.sleep(exchange.rateLimit / 1000)
         # except ccxt.RequestTimeout as e:
@@ -114,69 +116,33 @@ async def poll(exchange, pairs):
             print('[' + type(e).__name__ + ']')
             print(str(e)[0:200])
             # abort
-            break
+            # break
 
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
-        # while True:
-        exchange_name = await websocket.receive_text()
-        exchange_id = exchange_name.lower()
-        exchange = await setup_exchange(exchange_id)
-        # response = await exchange.fetchBidsAsks(pairSymbols)
-        # await exchange.close()
-        async for orderbook in poll(exchange, pairSymbols):
-            print('order book', orderbook)
-            print('response from exchange', orderbook)
-            graph = build_graph(orderbook, 'binance')
-            print('graph built', graph)
-            data = await findarbitrage(Graph(**graph))
-            if data is not None:
-                print('data', data)
-                await websocket.send_json(jsonable_encoder(data))
-        await exchange.close()
-    except WebSocketDisconnect:
-        print('ex')
+        while True:
+            request = await websocket.receive_json()
+            print('client request', request)
+            exchange_name = request['exchange']
+            pairs = request['pairs']
+            exchange_id = exchange_name.lower()
+            exchange = await setup_exchange(exchange_id)
+            async for orderbook in poll(exchange, pairs):
+                print('order book', orderbook)
+                graph = build_graph(orderbook, exchange_id)
+                print('graph built', graph)
+                data = await findarbitrage(Graph(**graph))
+                if data is not None:
+                    print('data', data)
+                    await websocket.send_json(jsonable_encoder(data))
+            await exchange.close()
+    except WebSocketDisconnect as e:
+        print('[' + type(e).__name__ + ']')
+        print(str(e)[0:200])
     await websocket.close()
-
-
-pairSymbols = [
-    'ADA/EUR',
-    'ADA/ETH',
-    'ADA/USD',
-    'ADA/USDT',
-    'ADA/BTC',
-    'DAI/USDT',
-    'DOT/ETH',
-    'DOT/USDT',
-    'DOT/EUR',
-    'DOT/BTC',
-    'ETH/USDT',
-    'LINK/ETH',
-    'LINK/EUR',
-    'LINK/USDT',
-    'LINK/BTC',
-    'NANO/ETH',
-    'NANO/BTC',
-    'DOGE/USDT',
-    'DOGE/EUR',
-    'DOGE/BTC',
-    'LTC/BTC',
-    'LTC/USD',
-    'LTC/USDT',
-    'LTC/EUR',
-    'XRP/ETH',
-    'XRP/USD',
-    'XRP/USDT',
-    'XRP/BTC',
-    'XRP/EUR',
-    'BTC/EUR',
-    'BTC/USD',
-    'BTC/USDT',
-    'BTC/DAI',
-]
 
 
 async def setup_exchange(exchange_id='binance'):
@@ -185,9 +151,6 @@ async def setup_exchange(exchange_id='binance'):
         'asyncio_loop': loop,
         'enableRateLimit': True,  # as required by https://github.com/ccxt/ccxt/wiki/Manual#rate-limit
     })
-    # response = await exchange.fetchBidsAsks(pairSymbols)
-    # print('response', response)
-    # await exchange.close()
     return exchange
 
 
@@ -211,19 +174,14 @@ def build_graph(obj, exchange):
     print('object values', obj.values())
     all_edges = reduce(map_props, obj.values(), [])
     edges = list(filter(
-        lambda symbol: 'quote' in symbol
-                       and (bool(symbol['quote']) or
-                            (symbol['quote'] != math.inf and symbol['quote'] != 0)),
+        lambda symbol: 'quote' in symbol and (bool(symbol['quote']) or
+                                              (symbol['quote'] != math.inf and symbol['quote'] != 0)),
         all_edges
     ))
     currencies = reduce(lambda acc, edge: [*acc, edge['source'], edge['target']], edges, [])
     nodes = list(dict.fromkeys(currencies))
     return {'edges': edges, 'nodes': nodes, 'exchange': exchange}
 
-# Run main coroutine
-# loop = asyncio.get_event_loop()
-# loop.run_until_complete(main())
-# loop.close()
 
 # ------------------------------------------------------------------------------
 #

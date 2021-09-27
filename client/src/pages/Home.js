@@ -3,70 +3,47 @@
  */
 
 import React, {useEffect, useState} from 'react'
-import {makeStyles} from '@material-ui/core'
+import {makeStyles, Switch} from '@material-ui/core'
 import Page from 'pages/Page'
 import {useDispatch, useSelector} from 'react-redux'
 import GraphContainer from 'containers/GraphContainer'
-import {loadArbitrages, searchArbitrage} from 'reducers/ArbitragesActions'
-import {selectArbitrages} from 'reducers/Arbitrages'
-import {pairSymbols, symbols, getCurrencies} from 'utils/currencies'
-import {createElements, createGraph, createGraphFromOrders, createGraphFromTickers} from 'utils/helper-functions'
-import ccxt from 'ccxt'
+import {loadArbitrages, update} from 'reducers/ArbitragesActions'
+import {selectLastArbitrage, selectSortedArbitrages} from 'reducers/Arbitrages'
+import {getCurrencies, pairSymbols} from 'utils/currencies'
+import {createElements} from 'utils/helper-functions'
+import useWebSocket from 'utils/useWebSocket'
+import HistoryTable from 'containers/HistoryTable'
 
 
-const useStyles = makeStyles(({palette, size}) => ({
+const useStyles = makeStyles(({palette, spacing}) => ({
 	container: {
 		width: '100%',
 		height: '100%',
-		paddingRight: size.spacing
+		paddingRight: spacing()
+	},
+	information: {
+		display: 'flex',
+		flexFlow: 'column',
+		minWidth: '40%',
+		height: '100%',
+		justifyContent: 'center',
+		marginLeft: spacing(2),
+		'& > *:not(:last-child)': {
+			marginBottom: spacing(2)
+		}
+	},
+	table: {},
+	switch: {
+		display: 'flex',
+		justifyContent: 'flex-end',
+		alignItems: 'center',
+		'& > *:not(:last-child)': {
+			marginRight: spacing()
+		}
 	}
 }))
 
-const exchange = 'kraken' // huobijapan, aax, binance, coinbase, huobipro, okex, bitstamp, lmax
-
-const options = {
-	mode: 'cors',
-	cache: 'no-cache',
-	credentials: 'same-origin',
-	headers: {
-		'Content-Type': 'application/json'
-	},
-	redirect: 'follow',
-	referrer: 'no-referrer'
-	//Authorization: `Apikey ${API_KEY}`
-}
-
-const getAssetPairs = async () => {
-	const api_key = '242834de20228bbe411926b94345dfbbab2da39a8ac1514d7a1165cbd9984d58'
-
-	const url = 'https://min-api.cryptocompare.com/data/pricemulti' //'https://api.kraken.com/0/public/AssetPairs'
-	const params = new URLSearchParams({
-		fsyms: symbols,
-		tsyms: symbols,
-		tryConversion: false,
-		relaxedValidation: true,
-		e: exchange,
-		api_key
-	})
-	const endpoint = `${url}?${params}`
-
-	const response = await fetch(endpoint, options)
-	console.log('call at', endpoint)
-	return await response.json()
-}
-
-
-const defaultGraph = {nodes: [], edges: []}
-
-const pairs = symbols.reduce((acc, symbol) => {
-	const symbolQuotes = symbols.reduce((accumulator, current) => {
-		if (symbol === current) {
-			return accumulator
-		}
-		return accumulator.concat(`${symbol}/${current}`)
-	}, [])
-	return acc.concat(symbolQuotes)
-}, [])
+const defaultGraph = {nodes: [], edges: [], cycle: {}}
 
 const Home = props => {
 
@@ -75,83 +52,66 @@ const Home = props => {
 	const classes = useStyles()
 
 	const dispatch = useDispatch()
-	const arbitrages = useSelector(selectArbitrages)
+	const arbitrages = useSelector(selectSortedArbitrages)
+	const last = useSelector(selectLastArbitrage)
+	console.log('arbitrages', arbitrages)
 
-	const [graph, setGraph] = useState(defaultGraph)  // createGraph(rates)
-	const [exchange, setExchange] = useState(new ccxt.binance({
-		enableRateLimit: true,
-		proxy: 'http://localhost:8081/'
-	}))
+	const [graph, setGraph] = useState(last || defaultGraph)
+	const [cycleToggle, setCycleToggle] = useState(false)
+	const [request, setRequest] = useState(0)
 
-	const {rateLimit = 0} = exchange
-
-	const secs = 10
-	const delay = secs * 1000
-
-	let timesCalled = 1
-
-	const findArbitrage = () => {
-		getAssetPairs().then(response => {
-			console.log('response from server', response)
-			// setRates(response)
-			return createGraph(response, exchange)
-		})
-			.then(item => {
-				setGraph(item)
-				dispatch(searchArbitrage(item))
-				return item
-			})
+	const message = {
+		exchange: 'binance',
+		pairs: pairSymbols
 	}
 
-	const findArbitrageFromTickers = () => {
-		if (!exchange) {
-			return
-		}
-		exchange.fetchBidsAsks(pairSymbols) //
-			.then(result => {
-				console.log('bid/ask result', result)
-				return result
-			}, error => console.error(error))
-			.then(result => {
-				return createGraphFromOrders(result, 'binance')
-			})
-			.then(item => {
-				setGraph(item)
-				dispatch(searchArbitrage(item))
-				return item
-			})
+	const onMessage = data => {
+		dispatch(update(data))
 	}
 
-
-	const ws = new WebSocket("ws://localhost:9004/ws")
-	ws.onmessage = event => {
-		console.log('message from server', event.data)
+	const sendMessage = (ws) => {
+		ws.send(JSON.stringify(message))
 	}
 
-	ws.onopen = event => {
-		ws.send('binance')
+	const onOpen = ws => {
+		sendMessage(ws)
 	}
+
+	const {webSocket} = useWebSocket('ws', onOpen, onMessage)
 
 	useEffect(() => {
-		// ws.send('binance')
+		dispatch(loadArbitrages())
 	}, [])
 
-/*	useEffect(() => {
-		// console.log('pairs', symbols.length, pairs)
-		/!*    exchange.loadMarkets().then(result => {
-					console.log('markets', Object.keys(result).length, result)
-					return result
-				}, error => console.error(error))*!/
-		// console.log('bitfinex has fetchTickers', exchange.has['fetchTickers'])
-		findArbitrageFromTickers()
-		dispatch(loadArbitrages())
-		let timerId = setTimeout(function loadPrices() {
-			console.log('timesCalled', ++timesCalled)
-			findArbitrageFromTickers()
-			timerId = setTimeout(loadPrices, rateLimit)
-		}, rateLimit)
+	useEffect(() => {
+		if (!last) {
+			return
+		}
+		setGraph(last)
+	}, [last])
 
-	}, [])*/
+	useEffect(() => {
+		if (!request) {
+			return
+		}
+		sendMessage(webSocket)
+	}, [request])
+
+	useEffect(() => {
+		if (cycleToggle) {
+			setGraph(graph.cycle)
+		} else {
+			if (last) {
+				setGraph(last)
+			}
+		}
+	}, [cycleToggle])
+
+	useEffect(() => {
+		if (graph.cycle && cycleToggle) {
+			setCycleToggle(!cycleToggle)
+		}
+	}, [graph])
 
 
 	// console.log('moment formatted', moment.utc(data.timestamp).local().format("D MMM YYYY HH:mm Z"))
@@ -160,9 +120,15 @@ const Home = props => {
 
 	return (
 		<Page>
-			<div className={classes.container}>
-				<div>Arbitrages found so far: {arbitrages.length}</div>
-				<GraphContainer elements={createElements(graph, getCurrencies(graph.nodes))}/>
+			<GraphContainer elements={createElements(graph, getCurrencies(graph.nodes))}/>
+			<div className={classes.information}>
+				<span>Arbitrages found so far: {arbitrages.length}</span>
+				<div>Request: {request}</div>
+				<HistoryTable className={classes.table} items={arbitrages} selected={graph.id} onCellClick={graph => setGraph(graph)}/>
+				<div className={classes.switch}>
+					<Switch checked={cycleToggle} size={'small'} onClick={() => setCycleToggle(!cycleToggle)}/>
+					<span>{cycleToggle ? 'Hide' : 'Show'} Cycle</span>
+				</div>
 			</div>
 		</Page>
 	)

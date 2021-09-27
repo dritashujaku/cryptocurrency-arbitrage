@@ -22,7 +22,7 @@ class ShortestPath:
 
     def bellmanford(self, graph: AdjacencyListGraph, source: int):
         self.queue.append(source)
-        while len(self.queue) and not self.has_negative_cycle():
+        while len(self.queue) and self.cycle is None:
             v = self.queue.popleft()
             self.relax(graph, v)
 

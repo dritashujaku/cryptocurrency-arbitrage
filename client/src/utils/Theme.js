@@ -19,7 +19,7 @@ const palette = {
     },
     text: {
       default: '#293642',
-      primary: '#314151',
+      primary: '#515d6e',
       secondary: '#94a6b8'
     },
     background: {
@@ -55,7 +55,7 @@ const palette = {
     },
     text: {
       default: '#94a6b8',
-      primary: '#314151',
+      primary: '#516273',
       //primary: '#293642',
       //primary: '#314151',
       secondary: '#94A6B8'
