@@ -18,6 +18,7 @@ const useStyles = makeStyles(({palette, size, transitions}) => ({
 		boxShadow: `0px 0px 2px ${palette.background.light}`
 	},
 	row: {
+		whiteSpace: 'nowrap',
 		'& th': {
 			color: palette.text.default
 		},
@@ -55,7 +56,7 @@ const HistoryTable = props => {
 					<TableRow className={classes.row}>
 						<TableCell>Time</TableCell>
 						<TableCell align='left'>Profit</TableCell>
-						<TableCell align='center'>Cycle</TableCell>
+						<TableCell align='center'>Arbitrage</TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>

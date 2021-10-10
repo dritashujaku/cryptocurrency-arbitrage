@@ -22,7 +22,6 @@ class Graph(Model):
     nodes: List[str]  # FrozenSet[str] = frozenset()
     edges: List[Edge]
     profit: Optional[float]
-    usdProfit: Optional[float]
     exchange: Optional[str]
     currency: Optional[str]
     # data: dict

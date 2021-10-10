@@ -20,16 +20,15 @@ import LoadingIndicator from 'utils/LoadingIndicator'
 const useStyles = makeStyles(({palette, spacing}) => ({
 	container: {
 		width: '100%',
-		height: '100%',
-		paddingRight: spacing()
+		height: '100%'
 	},
 	information: {
 		display: 'flex',
 		flexFlow: 'column',
-		minWidth: '42%',
+		minWidth: '30%',
 		height: '100%',
 		justifyContent: 'center',
-		marginLeft: spacing(2),
+		padding: spacing(2),
 		'& > *:not(:last-child)': {
 			marginBottom: spacing(2)
 		}
@@ -107,7 +106,7 @@ const Home = props => {
 		<Page>
 			{!view.code ? <GraphContainer elements={createElements(path, getCurrencies(path.nodes), cycleToggle)}/> : <span>{view.message}</span>}
 			<div className={classes.information}>
-				<span>Arbitrages found so far: {arbitrages.length}</span>
+				<span>Last 10 arbitrage opportunities</span>
 				<HistoryTable className={classes.table} items={arbitrages} selected={graph.id} onCellClick={setGraph}/>
 				<div className={classes.switch} onClick={() => setCycleToggle(!cycleToggle)}>
 					<Switch checked={cycleToggle} size={'small'}/>

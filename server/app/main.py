@@ -155,12 +155,14 @@ def map_props(array, pair):
     bid_dict = {
         'source': source,
         'target': target,
-        'quote': pair['bid']
+        'quote': pair['bid'],
+        'volume': pair['bidVolume']
     }
     ask_dict = {
         'source': target,
         'target': source,
-        'quote': 1 / (pair['ask'] or math.inf)
+        'quote': 1 / (pair['ask'] or math.inf),
+        'volume': pair['askVolume']
     }
     return [*array, bid_dict, ask_dict]
 
