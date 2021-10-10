@@ -7,9 +7,14 @@ First create a virtual environment
 ```
 $ python -m venv venv
 ```
-Then activate the venv
+Then activate the venv (Windows)
 ```
 $ .\venv\Scripts\activate
+```
+
+In macOS do this instead
+```
+$ source ./venv/bin/activate
 ```
 Now install the requirements from requirements.txt file in the terminal with
 ```
