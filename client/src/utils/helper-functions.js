@@ -33,3 +33,14 @@ export const createElements = (item, currencies, isCycle) => {
     edges
   }
 }
+
+export const configureChartData = (items) => {
+  return items.map((next = {}) => {
+    const {cycle = {}, profit = 0} = next
+    const {nodes = []} = cycle
+    return {
+      name: nodes.join('\n'),
+      value: profit
+    }
+  })
+}

@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+	fade,
 	makeStyles,
 	Table,
 	TableBody,
@@ -15,28 +16,26 @@ import classNames from 'classnames'
 
 const useStyles = makeStyles(({palette, size, transitions}) => ({
 	tableContainer: {
-		boxShadow: `0px 0px 2px ${palette.background.light}`
+		boxShadow: `0px 0px 1px 1px ${fade(palette.background.light, 0.7)}`,
+		borderRadius: 4
 	},
 	row: {
 		whiteSpace: 'nowrap',
-		'& th': {
-			color: palette.text.default
-		},
 		'& td': {
 			cursor: 'pointer'
 		},
 		'& td, & th': {
 			borderBottom: 'none',
-			boxShadow: `0px 0px 2px ${palette.background.light}`
+			// boxShadow: `0px 0px 2px ${palette.background.light}`
 		},
 		'&:hover td': {
-			color: palette.text.default,
+			backgroundColor: fade(palette.background.light, 0.12),
 			transition: transitions.create('all', transitions.duration.shorter, transitions.easing.easeInOut),
 		}
 	},
 	selectedRow: {
 		'& td': {
-			color: palette.text.default
+			color: palette.text.paper
 		},
 	}
 }))

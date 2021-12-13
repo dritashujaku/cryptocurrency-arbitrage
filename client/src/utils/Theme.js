@@ -47,24 +47,28 @@ const palette = {
     },
     secondary: {
       //light: '#50c0e5',
-      light: '#34576A',
+      dark: '#34576A',
       main: '#3cb9e2',
       //dark: '#38aed4',
-      dark: '#0093BB',
+      light: '#0093BB',
       contrastText: '#ffffff'
     },
     text: {
       default: '#94a6b8',
-      primary: '#516273',
+      primary: '#b4bfcb',
       //primary: '#293642',
       //primary: '#314151',
-      secondary: '#94A6B8'
+      secondary: '#6989a9',
+      paper: '#ffffff',
+      contrastText: '#20242a'
     },
     background: {
       light: '#8ca0b3',
       // main: '#334353',
-      main: '#22292d',
-      default: '#334353'
+      // main: '#22292d',
+      main: '#1a1b1c',
+      default: '#1a1b1c',
+      inverse: '#ffffff'
     },
     field: '#293642',
     border: '#314151',
@@ -72,7 +76,9 @@ const palette = {
   }
 }
 
-const backgroundColor = '#212427'
+const backgroundColor = '#212427' // #222426
+
+const rem = px => `${px / 16}rem` // 10
 
 const theme = (type = 'light') => ({
   type,
@@ -90,7 +96,8 @@ const theme = (type = 'light') => ({
     captionFont: 12,
     smallFont: 10,
     radius: 4,
-    drawer: 300
+    drawer: 300,
+    rem
   },
   overrides: {
     MuiInputBase: {

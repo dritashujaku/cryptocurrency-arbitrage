@@ -1,7 +1,38 @@
+import btc from 'cryptocurrency-icons/svg/color/btc.svg'
+import ada from 'cryptocurrency-icons/svg/color/ada.svg'
+import eur from 'cryptocurrency-icons/svg/color/eur.svg'
+import eth from 'cryptocurrency-icons/svg/color/eth.svg'
+import usdt from 'cryptocurrency-icons/svg/color/usdt.svg'
+import usd from 'cryptocurrency-icons/svg/color/usd.svg'
+import dot from 'cryptocurrency-icons/svg/color/dot.svg'
+import uni from 'cryptocurrency-icons/svg/color/uni.svg'
+import link from 'cryptocurrency-icons/svg/color/link.svg'
+import nano from 'cryptocurrency-icons/svg/color/nano.svg'
+import doge from 'cryptocurrency-icons/svg/color/doge.svg'
+import ltc from 'cryptocurrency-icons/svg/color/ltc.svg'
+import xrp from 'cryptocurrency-icons/svg/color/xrp.svg'
+
 export const symbols = [
 	'BTC', 'ETH', 'DOGE', 'USDT', 'USD', 'EUR', 'XRP', 'BCH', 'BSV', 'ADA', 'LTC', 'BNB', 'CRO', 'EOS', 'LINK', 'XTZ', 'XLM', 'TRX', 'XMR',
 	'GBP', 'CHF', 'CAD'
 ]
+
+const icons = {
+	'BTC': btc,
+	'ADA': ada,
+	'EUR': eur,
+	'ETH': eth,
+	'USDT': usdt,
+	'USD': usd,
+	'DOT': dot,
+	'UNI': uni,
+	'LINK': link,
+	'NANO': nano,
+	'DOGE': doge,
+	'LTC': ltc,
+	'XRP': xrp,
+
+}
 
 export const pairSymbols = [
 	'ADA/EUR',
@@ -48,7 +79,7 @@ export const getCurrencies = (symbols = []) => symbols
 	.reduce((acc, current) => {
 		let color, black
 		try {
-			color = require(`cryptocurrency-icons/svg/color/${current.toLowerCase()}.svg`)
+			color = icons[current] || require(`cryptocurrency-icons/svg/color/${current.toLowerCase()}.svg`)
 			black = require(`cryptocurrency-icons/svg/black/${current.toLowerCase()}.svg`)
 		} catch {
 			color = require(`cryptocurrency-icons/svg/color/generic.svg`)

@@ -8,7 +8,7 @@ from app.models.graph import Graph, Edge as EdgeModel
 from app.algorithms.shortestpath import ShortestPath
 
 
-def find(graph):
+def find(graph, start):
     rates_graph = AdjacencyListGraph(len(graph.nodes))
     for item in graph.edges:
         edge = Edge(
@@ -17,7 +17,7 @@ def find(graph):
             -log(item.quote)  # -log(item.quote, 2)
         )
         rates_graph.add_edge(edge)
-    shortest_path = ShortestPath(rates_graph)
+    shortest_path = ShortestPath(rates_graph, start)
     if not shortest_path.has_negative_cycle():
         return None
     nodes = []  # set()

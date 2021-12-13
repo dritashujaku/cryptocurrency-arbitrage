@@ -1,13 +1,12 @@
 import React, { useEffect, useRef } from 'react'
 import { makeStyles } from '@material-ui/core'
 import cytoscape from 'cytoscape'
+import classNames from 'classnames'
 
 const useStyles = makeStyles(({spacing}) => ({
   root: {
-    display: 'flex',
-    flex: 1,
-    height: `calc(100vh - ${spacing(4)}px)`,
-    justifyContent: 'center',
+    // display: 'flex',
+    // justifyContent: 'center',
   },
   container: {
     width: '100%',
@@ -38,17 +37,19 @@ const edgesStyle = {
     'curve-style': 'bezier',
     'target-arrow-shape': 'triangle',
     'line-fill': 'linear-gradient',
-    'line-opacity': 0.5,
-    'line-color': '#36b08a',
-    'target-arrow-color': '#8270bf',
-    'line-gradient-stop-colors': '#36b08a #8270bf',
+    'line-opacity': 0.35,
+    // 'line-color': '#36b08a',
+    // 'target-arrow-color': '#8270bf',
+    'line-color': '#0CC3E8', // 5C678F
+    'target-arrow-color': '#4d77ff',
+    'line-gradient-stop-colors': '#0C4FE8 #0CC3E8', // #00ddff #4d77ff
     // "arrow-scale": 20
   }
 }
 
 const violet = '#C5B0B8'
 
-const edgeColor = '#5AC79D'
+const edgeColor = '#0DFFE7'
 // green '#A7C987'
 // blue '#4EB0BA'
 
@@ -58,7 +59,7 @@ const cycleEdgeStyle = {
     // 'line-color': '#d76a26',
     // 'target-arrow-color': '#ffc967',
     // 'line-gradient-stop-colors': '#d76a26 #ffc967',
-    'line-color': '#5AC79D', // '#4DC59D',
+    'line-color': edgeColor, // '#4DC59D',
     'target-arrow-color': edgeColor,
     'line-gradient-stop-colors': edgeColor,
     'line-opacity': 0.8
@@ -96,7 +97,7 @@ const cycleEdgeLabelStyle = {
 
 const GraphContainer = props => {
 
-  const {elements} = props
+  const {className, elements} = props
 
   const classes = useStyles()
 
@@ -139,7 +140,7 @@ const GraphContainer = props => {
   console.log('elements', elements)
 
   return (
-    <div className={classes.root}>
+    <div className={classNames(classes.root, className)}>
       <div className={classes.container} ref={container}/>
     </div>
   )

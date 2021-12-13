@@ -13,6 +13,7 @@
     "clsx": "^1.0.4",
     "cryptocurrency-icons": "^0.17.1",
     "cytoscape": "^3.17.1",
+    "echarts": "5.2.2",
     "history": "^4.10.1",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",

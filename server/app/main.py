@@ -1,11 +1,14 @@
 import asyncio
+import json
 import math
 from functools import reduce
-from typing import List, Optional
+from random import randint
+from typing import List, Optional, Any
 
 from fastapi import FastAPI, WebSocket
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
+from odmantic.query import desc
 from starlette.websockets import WebSocketDisconnect
 
 from app.mongo import engine
@@ -32,13 +35,35 @@ app.add_middleware(
 )
 
 
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+
+manager = ConnectionManager()
+
 @app.get('/')
 async def root():
     return {'message': 'Welcome'}
 
 
-async def findarbitrage(graph: Graph):
-    arbitrage = find(graph)  # build_graph
+async def findarbitrage(graph: Graph, start):
+    print('random int start', start)
+    arbitrage = find(graph, start)  # build_graph
     # print('arbitrage', arbitrage)
     if arbitrage:
         return await engine.save(arbitrage)
@@ -48,7 +73,13 @@ async def findarbitrage(graph: Graph):
 
 @app.get('/arbitrages', response_model=List[Graph])
 async def get_all(skip: int = 0, limit: Optional[int] = None):
-    result = await engine.find(Graph, skip=skip, limit=limit)
+    result = await engine.find(Graph, sort=desc(Graph.timestamp), skip=skip, limit=limit)
+    return result
+
+
+@app.get('/top', response_model=List[Graph])
+async def get_top(limit: int = 10):
+    result = await engine.find(Graph, sort=desc(Graph.profit), limit=limit)
     return result
 
 
@@ -85,34 +116,34 @@ response = {
 
 
 async def poll(exchange, pairs):
-    while True:
-        try:
-            yield await exchange.fetchBidsAsks(pairs)
-            await exchange.close()
-            await asyncio.sleep(exchange.rateLimit / 1000 * 50)
-        # except ccxt.RequestTimeout as e:
-        #     print('[' + type(e).__name__ + ']')
-        #     print(str(e)[0:200])
-        # except ccxt.DDoSProtection as e:
-        #     print('[' + type(e).__name__ + ']')
-        #     print(str(e.args)[0:200])
-        #     # retry in a min
-        #     await asyncio.sleep(60 * 1000)
-        # except ccxt.ExchangeNotAvailable as e:
-        #     print('[' + type(e).__name__ + ']')
-        #     print(str(e.args)[0:200])
-        #     # retry in a min
-        #     await asyncio.sleep(60 * 1000)
-        except ccxt.NetworkError as e:
-            print('[' + type(e).__name__ + ']')
-            print(str(e.args)[0:200])
-            # retry in a min
-            await asyncio.sleep(60 * 1000)
-        except ccxt.ExchangeError as e:
-            print('[' + type(e).__name__ + ']')
-            print(str(e)[0:200])
-            # abort
-            # break
+    # while True:
+    try:
+        await asyncio.sleep(exchange.rateLimit / 1000 * 50)
+        return await exchange.fetchBidsAsks(pairs)
+        # await exchange.close()
+    # except ccxt.RequestTimeout as e:
+    #     print('[' + type(e).__name__ + ']')
+    #     print(str(e)[0:200])
+    # except ccxt.DDoSProtection as e:
+    #     print('[' + type(e).__name__ + ']')
+    #     print(str(e.args)[0:200])
+    #     # retry in a min
+    #     await asyncio.sleep(60 * 1000)
+    # except ccxt.ExchangeNotAvailable as e:
+    #     print('[' + type(e).__name__ + ']')
+    #     print(str(e.args)[0:200])
+    #     # retry in a min
+    #     await asyncio.sleep(60 * 1000)
+    except ccxt.NetworkError as e:
+        print('[' + type(e).__name__ + ']')
+        print(str(e.args)[0:200])
+        # retry in a min
+        await asyncio.sleep(60 * 1000)
+    except ccxt.ExchangeError as e:
+        print('[' + type(e).__name__ + ']')
+        print(str(e)[0:200])
+        # abort
+        # break
 
 
 @app.websocket("/ws")
@@ -126,14 +157,16 @@ async def websocket_endpoint(websocket: WebSocket):
             pairs = request['pairs']
             exchange_id = exchange_name.lower()
             exchange = await setup_exchange(exchange_id)
-            async for orderbook in poll(exchange, pairs):
+            # message = asyncio.create_task(websocket.receive_json())
+            data = None
+            while data is None:
+                orderbook = await poll(exchange, pairs)
                 # print('order book', orderbook)
-                graph = build_graph(orderbook, exchange_id)
-                # print('graph built', graph)
-                data = await findarbitrage(Graph(**graph))
-                if data is not None:
-                    await websocket.send_json(jsonable_encoder(data))
-            await exchange.close()
+                graph = build_graph(orderbook, exchange_id, pairs)
+                if len(graph):
+                    data = await findarbitrage(Graph(**graph), randint(0, len(graph['nodes']) - 1))
+            if data is not None:
+                await websocket.send_json(jsonable_encoder(data))
     except WebSocketDisconnect as e:
         print('[' + type(e).__name__ + ']')
         print(str(e)[0:200])
@@ -141,7 +174,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 async def setup_exchange(exchange_id='binance'):
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     exchange = getattr(ccxt, exchange_id)({
         'asyncio_loop': loop,
         'enableRateLimit': True,  # as required by https://github.com/ccxt/ccxt/wiki/Manual#rate-limit
@@ -167,9 +200,16 @@ def map_props(array, pair):
     return [*array, bid_dict, ask_dict]
 
 
-def build_graph(obj, exchange):
-    # print('object values', obj.values())
-    all_edges = reduce(map_props, obj.values(), [])
+def order_pairs(array, market, obj):
+    if market not in obj:
+        return array
+    return [*array, obj[market]]
+
+
+def build_graph(obj, exchange, pairs):
+    ordered_markets = reduce(lambda array, x: order_pairs(array, x, obj), pairs, [])
+    print('ordered_markets', ordered_markets)
+    all_edges = reduce(map_props, ordered_markets, [])
     edges = list(filter(
         lambda symbol: 'quote' in symbol and (bool(symbol['quote']) or
                                               (symbol['quote'] != math.inf and symbol['quote'] != 0)),

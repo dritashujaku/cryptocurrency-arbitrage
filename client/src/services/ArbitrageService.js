@@ -44,4 +44,13 @@ export default class ArbitrageService {
     })
   }
 
+
+  top (limit = 8) {
+    return this.dispatch({
+      [CALL_API]: {
+        endpoint: `/top?limit=${limit}`
+      }
+    })
+  }
+
 }
