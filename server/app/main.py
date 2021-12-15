@@ -176,6 +176,7 @@ async def websocket_endpoint(websocket: WebSocket):
     asyncio.create_task(receive_message(websocket))
     try:
         while True:
+            # print('json_data', json_data)
             data = await find_arbitrage(json_data, exchange_id, exchange)
             if data is not None:
                 await websocket.send_json(jsonable_encoder(data))
@@ -220,7 +221,7 @@ def order_pairs(array, market, obj):
 
 def build_graph(obj, exchange, pairs):
     ordered_markets = reduce(lambda array, x: order_pairs(array, x, obj), pairs, [])
-    print('ordered_markets', ordered_markets)
+    # print('ordered_markets', ordered_markets)
     all_edges = reduce(map_props, ordered_markets, [])
     edges = list(filter(
         lambda symbol: 'quote' in symbol and (bool(symbol['quote']) or

@@ -11,6 +11,9 @@ import nano from 'cryptocurrency-icons/svg/color/nano.svg'
 import doge from 'cryptocurrency-icons/svg/color/doge.svg'
 import ltc from 'cryptocurrency-icons/svg/color/ltc.svg'
 import xrp from 'cryptocurrency-icons/svg/color/xrp.svg'
+import matic from 'cryptocurrency-icons/svg/color/matic.svg'
+import sol from 'cryptocurrency-icons/svg/color/sol.svg'
+import xlm from 'cryptocurrency-icons/svg/color/xlm.svg'
 
 export const symbols = [
 	'BTC', 'ETH', 'DOGE', 'USDT', 'USD', 'EUR', 'XRP', 'BCH', 'BSV', 'ADA', 'LTC', 'BNB', 'CRO', 'EOS', 'LINK', 'XTZ', 'XLM', 'TRX', 'XMR',
@@ -31,7 +34,9 @@ const icons = {
 	'DOGE': doge,
 	'LTC': ltc,
 	'XRP': xrp,
-
+	'MATIC': matic,
+	'SOL': sol,
+	'XLM': xlm,
 }
 
 export const pairSymbols = [
@@ -73,6 +78,19 @@ export const pairSymbols = [
 	'BTC/USD',
 	'BTC/USDT',
 	// 'BTC/DAI',
+	'LUNA/USDT',
+	'LUNA/BTC',
+	'LUNA/EUR',
+	'MATIC/USDT',
+	'MATIC/BTC',
+	'MATIC/ETH',
+	'SOL/USDT',
+	'SOL/BTC',
+	'SOL/ETH',
+	'XLM/USDT',
+	'XLM/EUR',
+	'XLM/BTC',
+
 ]
 
 export const getCurrencies = (symbols = []) => symbols

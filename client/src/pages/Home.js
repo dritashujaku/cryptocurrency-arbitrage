@@ -109,7 +109,11 @@ const useStyles = makeStyles(({palette, spacing, typography, transitions, size: 
 		'&$selectedPair': {
 			backgroundColor:  fade(palette.button.secondary, 0.4),
 			border: `1px solid ${fade(palette.button.secondary, 0.4)}`,
-			color: palette.text.default
+			color: palette.text.default,
+			// '&:hover': {
+			// 	backgroundColor:  palette.highlight.accent,
+			// 	border: `1px solid ${palette.highlight.accent}`,
+			// }
 		}
 	},
 	selectedPair: {},
@@ -155,7 +159,7 @@ const useStyles = makeStyles(({palette, spacing, typography, transitions, size: 
 	},
 	graphContainer: {
 		borderRadius: spacing(),
-		flex: `0 1 54%`,
+		flex: `0 0 54%`,
 		paddingLeft: rem(spacing(2)),
 		paddingRight: rem(spacing(2)),
 		margin: '0 auto',
@@ -192,6 +196,7 @@ const Home = props => {
 	const view = useSelector(selectView)
 	const service = new ArbitrageService(dispatch)
 	const timer = useRef()
+	const limit = 20
 
 	const [graph, setGraph] = useState(last || defaultGraph)
 	const [cycleToggle, setCycleToggle] = useState(false)
@@ -229,7 +234,7 @@ const Home = props => {
 
 	useEffect(() => {
 		dispatch(loadArbitrages())
-		service.top().then(data => {
+		service.top(limit).then(data => {
 			setChartData(data)
 		})
 	}, [])
@@ -295,7 +300,7 @@ const Home = props => {
 				</article>
 				<article className={classes.article}>
 					<div className={classNames(classes.card, classes.chart)}>
-						<span className={classes.chartTitle}>Top 8 arbitrage opportunities</span>
+						<span className={classes.chartTitle}>Top {limit} arbitrage opportunities</span>
 						<Chart data={configureChartData(chartData)} onClick={index => setGraph(chartData[index])}/>
 					</div>
 				</article>
