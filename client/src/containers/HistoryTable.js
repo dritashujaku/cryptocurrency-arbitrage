@@ -13,11 +13,14 @@ import PropTypes from 'prop-types'
 import moment from 'moment'
 import {roundNumber} from 'utils/helper-functions'
 import classNames from 'classnames'
+import {DATE_FORMAT} from 'Constants'
 
-const useStyles = makeStyles(({palette, size, transitions}) => ({
+const useStyles = makeStyles(({palette, size: {rem, defaultFont}, transitions}) => ({
 	tableContainer: {
-		boxShadow: `0px 0px 1px 1px ${fade(palette.background.light, 0.7)}`,
-		borderRadius: 4
+		// boxShadow: `0px 0px 2px 2px ${fade(palette.stroke, 0.7)}`,
+		border: `2px solid ${fade(palette.stroke, 0.7)}`,
+		borderRadius: 4,
+		overflow: 'hidden'
 	},
 	row: {
 		whiteSpace: 'nowrap',
@@ -25,11 +28,14 @@ const useStyles = makeStyles(({palette, size, transitions}) => ({
 			cursor: 'pointer'
 		},
 		'& td, & th': {
+			fontSize: rem(13),
 			borderBottom: 'none',
-			// boxShadow: `0px 0px 2px ${palette.background.light}`
+			textOverflow: 'ellipsis',
+			whiteSpace: 'nowrap',
+			overflow: 'hidden'
 		},
 		'&:hover td': {
-			backgroundColor: fade(palette.background.light, 0.12),
+			backgroundColor: fade(palette.highlight.secondary, 0.12),
 			transition: transitions.create('all', transitions.duration.shorter, transitions.easing.easeInOut),
 		}
 	},
@@ -66,8 +72,8 @@ const HistoryTable = props => {
 							sx={{'&:last-child td, &:last-child th': {border: 0}}}
 							onClick={() => onCellClick(row)}
 						>
-							<TableCell align={'right'}>
-								{moment.unix(row.timestamp).format("D MMM YYYY HH:mm:ss Z")}
+							<TableCell align={'left'}>
+								{moment.unix(row.timestamp).format(DATE_FORMAT)}
 							</TableCell>
 							<TableCell align='left'>{roundNumber(row.profit, 8)}</TableCell>
 							<TableCell align='center'>{formatNodes(row.cycle.nodes)}</TableCell>

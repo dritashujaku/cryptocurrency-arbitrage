@@ -19,11 +19,10 @@ import classNames from 'classnames'
 import ArbitrageService from 'services/ArbitrageService'
 import Chart from 'containers/Chart'
 
-const buttonColor = '#455972' // '#066ebb'
-
 const useStyles = makeStyles(({palette, spacing, typography, transitions, size: {rem, captionFont}}) => ({
 	root: {
-		flexFlow: 'row'
+		flexFlow: 'row',
+		scrollSnapType: 'y proximity'
 	},
 	container: {
 		width: '100%',
@@ -31,113 +30,103 @@ const useStyles = makeStyles(({palette, spacing, typography, transitions, size: 
 		display: 'flex',
 		alignItems: 'center'
 	},
-	title: {
-		...typography.h4,
-		marginTop: 0,
-		marginBottom: 0,
-		wordSpacing: '50em'
-	},
-	subHeader: {
-		...typography.h6,
-		maxWidth: rem(340),
-		color: palette.text.primary,
-		// color: '#6989a9',
-	},
-	text: {
-		color: palette.text.secondary,
-		...typography.body1
-	},
-	graphContainer: {
-		// backgroundColor: '#222426',
-		borderRadius: spacing(),
-		flex: `0 0 54%`,
-		paddingLeft: rem(spacing(2)),
-		paddingRight: rem(spacing(2)),
-		margin: '0 auto',
-		// height: `calc(100vh - ${spacing(4)}px)`,
-		// width: 'min-content',
-		// display: 'flex',
-		position: 'sticky',
-		top: 0,
-		right: 0
-	},
 	leftSection: {
-		// display: 'flex',
-		// flexFlow: 'column',
-		flexGrow: 1,
+		display: 'flex',
+		flexFlow: 'column',
 		marginTop: rem(spacing(3)),
 		marginBottom: rem(spacing(3)),
 		marginLeft: 'auto',
 		marginRight: 'auto',
 		paddingLeft: rem(spacing(3)),
-		maxWidth: '40%',
+		maxWidth: rem(580),
 		height: 'fit-content',
 		'& > *:not(:last-child)': {
 			marginBottom: rem(spacing(3))
 		}
 	},
-	intro: {
+	article: {
 		display: 'flex',
 		flexDirection: 'column',
-		width: '100%',
+		justifyContent: 'center',
 		height: `calc(100vh - ${rem(spacing(6))})`,
-		background: `linear-gradient(150deg, ${fade('#008FFF',0.35)} 0%, ${fade('#0D17FF',0.35)} 100%)`,
+		scrollSnapAlign: 'center',
+		// background: `linear-gradient(150deg, ${fade('#008FFF',0.35)} 0%, ${fade('#0D17FF',0.35)} 100%)`,
+	},
+	card: {
+		display: 'flex',
+		flexDirection: 'column',
 		borderRadius: spacing(1),
-		padding: rem(spacing(2)),
+		padding: rem(spacing(3)),
+		color: palette.text.default,
+		backgroundColor: palette.background.card,
+		width: '100%',
+	},
+	title: {
+		fontSize: rem(40),
+		fontWeight: 700,
+		marginTop: 0,
+		marginBottom: rem(spacing(2)),
+		lineHeight: 1.8,
+		// wordSpacing: '50em'
+	},
+	subHeader: {
+		...typography.h6,
+		fontWeight: 400,
+		maxWidth: rem(340),
+		marginTop: 0,
+		marginBottom: rem(spacing(2)),
+		color: palette.text.primary,
+		lineHeight: 1.6
+	},
+	text: {
+		...typography.body1,
+		fontWeight: 400,
+		color: palette.text.default,
+		marginBottom: rem(spacing(1))
 	},
 	currencies: {
 		display: 'flex',
 		flexFlow: 'row wrap',
 		borderRadius: spacing(1),
-		backdropFilter: 'blur(4px) brightness(0.85)',
+		backdropFilter: 'blur(4px) brightness(0.8)',
+		// border: `2px solid ${fade(palette.stroke, 0.7)}`,
 		width: '100%',
-		padding: rem(spacing(2)),
+		padding: rem(spacing(1)),
 		alignItems: 'baseline',
 		alignContent: 'start',
 		overflowY: 'overlay',
 		fontSize: rem(captionFont)
 	},
 	pair: {
-		// border: `1px solid ${palette.border}`,
 		borderRadius: spacing(2),
 		padding: `${rem(spacing(1 / 2))} ${rem(spacing(1))}`,
-		marginRight: rem(spacing(1)),
-		marginBottom: rem(spacing(1)),
-		border: `1px solid ${buttonColor}`,
-		color: buttonColor,
+		margin: rem(spacing(1 / 2)),
+		border: `1px solid ${palette.text.secondary}`,
+		color: palette.text.secondary,
 		fontWeight: 500,
 		cursor: 'pointer',
 		transition: transitions.create('all', transitions.duration.shorter, transitions.easing.easeInOut),
 		'&$selectedPair': {
-			backgroundColor:  fade(buttonColor, 0.4),
-			border: `1px solid ${fade(buttonColor, 0.4)}`,
-			color: palette.text.primary
+			backgroundColor:  fade(palette.button.secondary, 0.4),
+			border: `1px solid ${fade(palette.button.secondary, 0.4)}`,
+			color: palette.text.default
 		}
 	},
 	selectedPair: {},
-	information: {
-		display: 'flex',
-		flexFlow: 'column',
-		color: palette.text.primary,
-		height: '100%',
-		padding: rem(spacing(2)),
+	table: {
 		justifyContent: 'center',
 		backdropFilter: 'blur(4px) brightness(1.25)',
-		background: `linear-gradient(
-			150deg, ${fade('#1b1b1f', 0.45)} 0%, ${fade('#232428', 0.45)} 100%)`,
-		borderRadius: spacing(1),
+		// background: `linear-gradient(
+		// 	150deg, ${fade('#1b1b1f', 0.45)} 0%, ${fade('#232428', 0.45)} 100%)`,
 		'& > *:not(:last-child)': {
 			marginBottom: rem(spacing(2))
 		}
 	},
 	tableCaption: {
-		...typography.body1,
+		...typography.h6,
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'space-between'
-	},
-	table: {
-		fontSize: rem(captionFont),
 	},
 	switch: {
 		display: 'flex',
@@ -155,19 +144,24 @@ const useStyles = makeStyles(({palette, spacing, typography, transitions, size: 
 			marginRight: rem(spacing())
 		}
 	},
-	chartWrapper: {
-		display: 'flex',
-		flexDirection: 'column',
-		borderRadius: spacing(1),
-		// backdropFilter: 'blur(4px) brightness(0.85)',
-		backgroundColor: '#33325c', // '#303a41', // '#72647f',
-		// background: 'linear-gradient(168deg, #33325c 50%, #233462 100%)'
+	chart: {
+		padding: rem(spacing(2))
 	},
 	chartTitle: {
-		...typography.body1,
-		color: palette.text.primary,
+		...typography.h6,
+		color: palette.text.default,
 		padding: rem(spacing(2)),
 		paddingBottom: 0
+	},
+	graphContainer: {
+		borderRadius: spacing(),
+		flex: `0 1 54%`,
+		paddingLeft: rem(spacing(2)),
+		paddingRight: rem(spacing(2)),
+		margin: '0 auto',
+		position: 'sticky',
+		top: 0,
+		right: 0
 	}
 }))
 
@@ -272,32 +266,38 @@ const Home = props => {
 	return (
 		<Page className={classes.root}>
 			<section className={classes.leftSection}>
-				<article className={classes.intro}>
-					<h1 className={classes.title}>Cryptocurrency Arbitrage</h1>
-					<h3 className={classes.subHeader}>
-						An arbitrage finder for crypto & fiat markets within an exchange.
-					</h3>
-					<p className={classes.text}><strong>Select markets</strong> to be used in the calculations:</p>
-					<div className={classes.currencies}>
-						{pairSymbols.map((next, index) => (
-							<span
-								key={next}
-								className={classNames(classes.pair, isSelected(next) && classes.selectedPair)}
-								onClick={() => toggleMarket(next)}>
+				<article className={classes.article}>
+					<div className={classes.card}>
+						<h1 className={classes.title}>Cryptocurrency Arbitrage</h1>
+						<h3 className={classes.subHeader}>
+							An arbitrage finder for crypto & fiat markets within an exchange.
+						</h3>
+						<p className={classes.text}>Select markets</p>
+						<div className={classes.currencies}>
+							{pairSymbols.map((next, index) => (
+								<span
+									key={next}
+									className={classNames(classes.pair, isSelected(next) && classes.selectedPair)}
+									onClick={() => toggleMarket(next)}>
 								{next}
 							</span>
-						))}
+							))}
+						</div>
 					</div>
 				</article>
-				<article className={classes.information}>
-					<div className={classes.tableCaption}>
-						<span><strong>Last 10 arbitrage opportunities</strong></span>
+				<article className={classes.article}>
+					<div className={classNames(classes.card, classes.table)}>
+						<div className={classes.tableCaption}>
+							<span>Last 10 arbitrage opportunities</span>
+						</div>
+						<HistoryTable items={arbitrages} selected={graph.id} onCellClick={setGraph}/>
 					</div>
-					<HistoryTable className={classes.table} items={arbitrages} selected={graph.id} onCellClick={setGraph}/>
 				</article>
-				<article className={classes.chartWrapper}>
-					<span className={classes.chartTitle}><strong>Top 8 arbitrage opportunities</strong></span>
-					<Chart data={configureChartData(chartData)} onClick={index => setGraph(chartData[index])}/>
+				<article className={classes.article}>
+					<div className={classNames(classes.card, classes.chart)}>
+						<span className={classes.chartTitle}>Top 8 arbitrage opportunities</span>
+						<Chart data={configureChartData(chartData)} onClick={index => setGraph(chartData[index])}/>
+					</div>
 				</article>
 			</section>
 			{!view.code ?

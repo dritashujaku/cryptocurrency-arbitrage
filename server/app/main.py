@@ -146,25 +146,37 @@ async def poll(exchange, pairs):
         # break
 
 
+async def find_arbitrage(request, exchange_id, exchange):
+    print('finding arbitrage')
+    pairs = request['pairs']
+    data = None
+    orderbook = await poll(exchange, pairs)
+    # print('order book', orderbook)
+    graph = build_graph(orderbook, exchange_id, pairs)
+    if len(graph):
+        data = await findarbitrage(Graph(**graph), randint(0, len(graph['nodes']) - 1))
+    return data
+
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    json_data = await websocket.receive_json()
+    print('json data is here')
+    exchange_name = json_data['exchange']
+    exchange_id = exchange_name.lower()
+    exchange = await setup_exchange(exchange_id)
+
+    async def receive_message(websocket: WebSocket):
+        nonlocal json_data
+        async for message in websocket.iter_json():
+            print('received a new message from client')
+            json_data = message
+
+    asyncio.create_task(receive_message(websocket))
     try:
         while True:
-            request = await websocket.receive_json()
-            # print('client request', request)
-            exchange_name = request['exchange']
-            pairs = request['pairs']
-            exchange_id = exchange_name.lower()
-            exchange = await setup_exchange(exchange_id)
-            # message = asyncio.create_task(websocket.receive_json())
-            data = None
-            while data is None:
-                orderbook = await poll(exchange, pairs)
-                # print('order book', orderbook)
-                graph = build_graph(orderbook, exchange_id, pairs)
-                if len(graph):
-                    data = await findarbitrage(Graph(**graph), randint(0, len(graph['nodes']) - 1))
+            data = await find_arbitrage(json_data, exchange_id, exchange)
             if data is not None:
                 await websocket.send_json(jsonable_encoder(data))
     except WebSocketDisconnect as e:

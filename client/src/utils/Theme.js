@@ -54,11 +54,11 @@ const palette = {
       contrastText: '#ffffff'
     },
     text: {
-      default: '#94a6b8',
+      default: '#fffffe',
       primary: '#b4bfcb',
       //primary: '#293642',
       //primary: '#314151',
-      secondary: '#6989a9',
+      secondary: '#94a1b2',
       paper: '#ffffff',
       contrastText: '#20242a'
     },
@@ -66,13 +66,33 @@ const palette = {
       light: '#8ca0b3',
       // main: '#334353',
       // main: '#22292d',
-      main: '#1a1b1c',
-      default: '#1a1b1c',
+      main: '#16161a',
+      default: '#16161a',
+      card: '#242629', // #16161a
       inverse: '#ffffff'
     },
     field: '#293642',
+    stroke: '#010101',
     border: '#314151',
-    switcher: '#3cb9e2'
+    switcher: '#3cb9e2',
+    button: {
+      primary: '#393b3f',
+      secondary: '#455972'
+    },
+    highlight: {
+      main: '#fffffe',
+      secondary: '#72757e',
+      accent: '#7f5af0',
+      tertiary: '#2cb67d'
+    },
+    graph: [
+      '#6666f0',
+      '#4e78e2',
+      '#397dec',
+      '#2898ed',
+      '#1cbcbe',
+      '#14d17e',
+    ]
   }
 }
 

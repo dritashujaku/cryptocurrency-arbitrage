@@ -1,19 +1,19 @@
 import React, {useEffect, useRef, useState} from 'react'
-import {makeStyles} from '@material-ui/core'
+import {makeStyles, useTheme} from '@material-ui/core'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 import * as echarts from 'echarts'
 
-const useStyles = makeStyles(({palette, spacing, typography, transitions}) => ({
+const useStyles = makeStyles(({size}) => ({
 	root: {
-		width: props => props.width || '100%',
-		height: props => props.height || 380,
-		// margin: spacing(),
-		// paddingTop: spacing(2)
+		display: 'flex',
+		width: '100%',
+		minHeight: size.rem(340),
+		justifyContent: 'center'
 	}
 }))
 
-const configureGraph = (type, data) => {
+const configureGraph = (type, data, palette) => {
 	switch (type) {
 		case 'bar':
 			return {
@@ -21,14 +21,25 @@ const configureGraph = (type, data) => {
 					type: 'category',
 					data: data.map(item => item.name),
 					axisLabel: {
-						lineHeight: 16
+						lineHeight: 16,
+						color: palette.text.primary
 					},
 					axisTick: {
 						alignWithLabel: true,
+						color: palette.highlight.secondary
 					},
+					axisLine: {
+						lineStyle: {color: palette.highlight.secondary}
+					}
 				},
 				yAxis: {
 					type: 'value',
+					axisLabel: {
+						color: palette.text.primary
+					},
+					splitLine: {
+						lineStyle: {color: palette.highlight.secondary}
+					}
 				},
 				grid: {
 					left: '3%',
@@ -42,27 +53,11 @@ const configureGraph = (type, data) => {
 						type: 'shadow'
 					}
 				},
-				color: [
-					'#8679cb',
-					'#0dffe7',
-					'#0CC3E8',
-					'#0C4FE8',
-					'#008FFF',
-					// '#b6f6c7',
-					'#366AA2',
-					'#117099',
-					'#27996F',
-					'#BBA1D3',
-					'#4ab08c',// '#00AC91',
-					'#00AC83',
-					'#8277A2',
-					'#7D69EB',
-				],
+				color: [palette.highlight.accent, ...palette.graph],
 				backgroundColor: 'transparent',
 				textStyle: {
-					color: '#c9d2da', // '#20242a'
+					color: palette.text.secondary //  '#c9d2da',
 				}
-				// lineStyle: {color: '#fafafa'}
 			}
 		default:
 			return {}
@@ -72,21 +67,18 @@ const configureGraph = (type, data) => {
 
 const Chart = props => {
 
-	const {data, type, onClick, className} = props
+	const {data, type, onClick, style, className} = props
 
 	const classes = useStyles(props)
+	const {palette} = useTheme()
 
 	const [chart, setChart] = useState(null)
 	const ref = useRef()
 
 	useEffect(() => {
-		// if (!echarts) {
-		// 	return
-		// }
 		setChart(echarts.init(ref.current))
 		return () => {
 			chart?.dispose()
-			// chart = null
 		}
 	}, [])
 
@@ -95,7 +87,7 @@ const Chart = props => {
 			return
 		}
 		chart.setOption({
-			...configureGraph(type, data),
+			...configureGraph(type, data, palette),
 			series: [{
 				// name: 'Data',
 				data,
@@ -112,7 +104,7 @@ const Chart = props => {
 
 
 	return (
-		<div className={classNames(classes.root, className)} ref={ref}/>
+		<div className={classNames(classes.root, className)} ref={ref} style={style}/>
 	)
 }
 

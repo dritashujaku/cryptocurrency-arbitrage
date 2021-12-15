@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react'
-import { makeStyles } from '@material-ui/core'
+import {makeStyles, useTheme} from '@material-ui/core'
 import cytoscape from 'cytoscape'
 import classNames from 'classnames'
+import useWindowSize from 'utils/useWindowSize'
 
 const useStyles = makeStyles(({spacing}) => ({
   root: {
@@ -29,7 +30,7 @@ const getNodeStyle = node => ({
   }
 })
 
-const edgesStyle = {
+const edgesStyle = palette => ({
   selector: 'edge',
   style: {
     label: 'data(quote)',
@@ -38,35 +39,27 @@ const edgesStyle = {
     'target-arrow-shape': 'triangle',
     'line-fill': 'linear-gradient',
     'line-opacity': 0.35,
-    // 'line-color': '#36b08a',
-    // 'target-arrow-color': '#8270bf',
-    'line-color': '#0CC3E8', // 5C678F
-    'target-arrow-color': '#4d77ff',
-    'line-gradient-stop-colors': '#0C4FE8 #0CC3E8', // #00ddff #4d77ff
-    // "arrow-scale": 20
+    // 'line-color': palette.graph[5],
+    'target-arrow-color': palette.graph[4],
+    'line-gradient-stop-colors': `${palette.graph[0]} ${palette.graph[4]}`
+  }
+})
+
+
+const cycleEdgeStyle = palette => {
+  const edgeColor = palette.highlight.tertiary
+  return {
+    selector: 'edge[?inCycle]',
+    style: {
+      'line-color': edgeColor,
+      'target-arrow-color': edgeColor,
+      'line-gradient-stop-colors': edgeColor,
+      'line-opacity': 0.8
+    }
   }
 }
 
-const violet = '#C5B0B8'
-
-const edgeColor = '#0DFFE7'
-// green '#A7C987'
-// blue '#4EB0BA'
-
-const cycleEdgeStyle = {
-  selector: 'edge[?inCycle]',
-  style: {
-    // 'line-color': '#d76a26',
-    // 'target-arrow-color': '#ffc967',
-    // 'line-gradient-stop-colors': '#d76a26 #ffc967',
-    'line-color': edgeColor, // '#4DC59D',
-    'target-arrow-color': edgeColor,
-    'line-gradient-stop-colors': edgeColor,
-    'line-opacity': 0.8
-  }
-}
-
-const edgeLabelStyle = {
+const edgeLabelStyle = palette => ({
   selector: 'edge[quote]',
   css: {
     // 'label': 'data(quote)',
@@ -75,34 +68,37 @@ const edgeLabelStyle = {
     'text-margin-y': '0px',
     'text-valign': 'center',
     'text-halign': 'center',
-    'color': '#94a6b8',
+    'color': palette.text.secondary, // '#94a6b8',
     'font-size': 10,
     // 'text-background-opacity': 0.4,
     // 'text-background-color': '#202121'
   }
-}
+})
 
-const cycleEdgeLabelStyle = {
+const cycleEdgeLabelStyle = palette => ({
   selector: 'edge[quote][?inCycle]',
   css: {
-    'color': '#d2d2e5',
+    'color': palette.text.default,
     'font-size': 15,
     'z-index': 101,
     'z-index-compare': 'manual',
     'z-compound-depth': 'top',
     'text-background-opacity': 0.4,
-    'text-background-color': '#202121'
+    'text-background-color': palette.background.main
   }
-}
+})
 
 const GraphContainer = props => {
 
   const {className, elements} = props
 
   const classes = useStyles()
+  const {palette} = useTheme()
 
   const container = useRef(null)
   const graph = useRef(null)
+
+  const [width] = useWindowSize()
 
   const buildGraph = () => {
     graph.current = cytoscape({
@@ -117,10 +113,10 @@ const GraphContainer = props => {
       },
       style: [
         ...elements.nodes.map(getNodeStyle),
-        edgesStyle,
-        edgeLabelStyle,
-        cycleEdgeStyle,
-        cycleEdgeLabelStyle
+        edgesStyle(palette),
+        edgeLabelStyle(palette),
+        cycleEdgeStyle(palette),
+        cycleEdgeLabelStyle(palette)
       ]
     })
   }
@@ -135,9 +131,8 @@ const GraphContainer = props => {
     return () => {
       graph.current && graph.current.destroy()
     }
-  }, [elements])
+  }, [elements, width])
 
-  console.log('elements', elements)
 
   return (
     <div className={classNames(classes.root, className)}>
