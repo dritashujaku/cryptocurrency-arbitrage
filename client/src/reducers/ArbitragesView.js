@@ -21,4 +21,6 @@ const view = (state = defaultState, action) => {
   }
 }
 
+export const selectView = state => state.view
+
 export default view

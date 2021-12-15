@@ -19,7 +19,7 @@ const palette = {
     },
     text: {
       default: '#293642',
-      primary: '#314151',
+      primary: '#515d6e',
       secondary: '#94a6b8'
     },
     background: {
@@ -47,32 +47,58 @@ const palette = {
     },
     secondary: {
       //light: '#50c0e5',
-      light: '#34576A',
+      dark: '#34576A',
       main: '#3cb9e2',
       //dark: '#38aed4',
-      dark: '#0093BB',
+      light: '#0093BB',
       contrastText: '#ffffff'
     },
     text: {
-      default: '#94a6b8',
-      primary: '#314151',
+      default: '#fffffe',
+      primary: '#b4bfcb',
       //primary: '#293642',
       //primary: '#314151',
-      secondary: '#94A6B8'
+      secondary: '#94a1b2',
+      paper: '#ffffff',
+      contrastText: '#20242a'
     },
     background: {
       light: '#8ca0b3',
       // main: '#334353',
-      main: '#22292d',
-      default: '#334353'
+      // main: '#22292d',
+      main: '#16161a',
+      default: '#16161a',
+      card: '#242629', // #16161a
+      inverse: '#ffffff'
     },
     field: '#293642',
+    stroke: '#010101',
     border: '#314151',
-    switcher: '#3cb9e2'
+    switcher: '#3cb9e2',
+    button: {
+      primary: '#393b3f',
+      secondary: '#455972'
+    },
+    highlight: {
+      main: '#fffffe',
+      secondary: '#72757e',
+      accent: '#7f5af0',
+      tertiary: '#2cb67d'
+    },
+    graph: [
+      '#6666f0',
+      '#4e78e2',
+      '#397dec',
+      '#2898ed',
+      '#1cbcbe',
+      '#14d17e',
+    ]
   }
 }
 
-const backgroundColor = '#212427'
+const backgroundColor = '#212427' // #222426
+
+const rem = px => `${px / 16}rem` // 10
 
 const theme = (type = 'light') => ({
   type,
@@ -90,7 +116,8 @@ const theme = (type = 'light') => ({
     captionFont: 12,
     smallFont: 10,
     radius: 4,
-    drawer: 300
+    drawer: 300,
+    rem
   },
   overrides: {
     MuiInputBase: {

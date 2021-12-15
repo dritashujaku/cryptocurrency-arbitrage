@@ -14,10 +14,15 @@ export default class ArbitrageService {
     this.dispatch = dispatch
   }
 
-  getAll () {
+  getAll (limit = 20, skip = 0) {
+    const data = {
+      limit,
+      skip
+    }
+    const params = new URLSearchParams(data)
     return this.dispatch({
       [CALL_API]: {
-        endpoint: '/arbitrages'
+        endpoint: `/arbitrages?${params}`
       }
     })
   }
@@ -35,6 +40,15 @@ export default class ArbitrageService {
           },
           body: JSON.stringify(item)
         }
+      }
+    })
+  }
+
+
+  top (limit = 8) {
+    return this.dispatch({
+      [CALL_API]: {
+        endpoint: `/top?limit=${limit}`
       }
     })
   }

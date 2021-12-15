@@ -1,14 +1,13 @@
 import React, { useEffect, useRef } from 'react'
-import { makeStyles } from '@material-ui/core'
+import {makeStyles, useTheme} from '@material-ui/core'
 import cytoscape from 'cytoscape'
+import classNames from 'classnames'
+import useWindowSize from 'utils/useWindowSize'
 
-const useStyles = makeStyles(({}) => ({
+const useStyles = makeStyles(({spacing}) => ({
   root: {
-    display: 'flex',
-    flex: 1,
-    width: '90vw',
-    height: '90vh',
-    justifyContent: 'center',
+    // display: 'flex',
+    // justifyContent: 'center',
   },
   container: {
     width: '100%',
@@ -20,40 +19,47 @@ const useStyles = makeStyles(({}) => ({
 const getNodeStyle = node => ({
   selector: `#${node.data.id}`,  // 'node',
   style: {
+    width: 40,
+    height: 40,
     'border-color': '#000',
     'border-width': 2,
     'border-opacity': 0.5,
-    // 'background-width': '100%',
-    // 'background-height': '100%',
-    width: 40,
-    height: 40,
     'background-image': 'data:image/svg+xml;utf8,' + encodeURIComponent(node.data.svg),
     'background-opacity': 0,
-    // 'background-clip': 'none',
-    'background-fit': 'cover',
-    // 'background-position-x' : 0,
-    // 'background-position-y' : 0
+    'background-fit': 'cover'
   }
 })
 
-const edgesStyle = {
+const edgesStyle = palette => ({
   selector: 'edge',
   style: {
     label: 'data(quote)',
     width: 5,
-    // 'line-color': '#8b8b91',
-    'line-color': '#36b08a',
-    'target-arrow-color': '#8270bf',
     'curve-style': 'bezier',
     'target-arrow-shape': 'triangle',
-    'line-opacity': 0.5,
     'line-fill': 'linear-gradient',
-    'line-gradient-stop-colors': '#36b08a #8270bf'
-    // "arrow-scale": 20
+    'line-opacity': 0.35,
+    // 'line-color': palette.graph[5],
+    'target-arrow-color': palette.graph[4],
+    'line-gradient-stop-colors': `${palette.graph[0]} ${palette.graph[4]}`
+  }
+})
+
+
+const cycleEdgeStyle = palette => {
+  const edgeColor = palette.highlight.tertiary
+  return {
+    selector: 'edge[?inCycle]',
+    style: {
+      'line-color': edgeColor,
+      'target-arrow-color': edgeColor,
+      'line-gradient-stop-colors': edgeColor,
+      'line-opacity': 0.8
+    }
   }
 }
 
-const edgeLabelStyle = {
+const edgeLabelStyle = palette => ({
   selector: 'edge[quote]',
   css: {
     // 'label': 'data(quote)',
@@ -62,21 +68,37 @@ const edgeLabelStyle = {
     'text-margin-y': '0px',
     'text-valign': 'center',
     'text-halign': 'center',
-    'color': '#94A6B8',
+    'color': palette.text.secondary, // '#94a6b8',
     'font-size': 10,
-    // "text-background-opacity": 0.7,
-    // "text-background-color": "#000",
+    // 'text-background-opacity': 0.4,
+    // 'text-background-color': '#202121'
   }
-}
+})
+
+const cycleEdgeLabelStyle = palette => ({
+  selector: 'edge[quote][?inCycle]',
+  css: {
+    'color': palette.text.default,
+    'font-size': 15,
+    'z-index': 101,
+    'z-index-compare': 'manual',
+    'z-compound-depth': 'top',
+    'text-background-opacity': 0.4,
+    'text-background-color': palette.background.main
+  }
+})
 
 const GraphContainer = props => {
 
-  const {elements} = props
+  const {className, elements} = props
 
   const classes = useStyles()
+  const {palette} = useTheme()
 
   const container = useRef(null)
   const graph = useRef(null)
+
+  const [width] = useWindowSize()
 
   const buildGraph = () => {
     graph.current = cytoscape({
@@ -91,8 +113,10 @@ const GraphContainer = props => {
       },
       style: [
         ...elements.nodes.map(getNodeStyle),
-        edgesStyle,
-        edgeLabelStyle
+        edgesStyle(palette),
+        edgeLabelStyle(palette),
+        cycleEdgeStyle(palette),
+        cycleEdgeLabelStyle(palette)
       ]
     })
   }
@@ -107,14 +131,13 @@ const GraphContainer = props => {
     return () => {
       graph.current && graph.current.destroy()
     }
-  }, [elements])
+  }, [elements, width])
 
 
   return (
-    <div className={classes.root}>
+    <div className={classNames(classes.root, className)}>
       <div className={classes.container} ref={container}/>
     </div>
-
   )
 }
 

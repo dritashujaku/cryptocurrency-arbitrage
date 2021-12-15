@@ -11,7 +11,7 @@ const receiveData = data => ({
   data
 })
 
-const update = item => ({
+export const update = item => ({
   type: ACTIONS.ADD_ARBITRAGE,
   item
 })
